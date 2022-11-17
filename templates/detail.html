@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}車輛瑕疵檢測明細表{% endblock title %}
+
+
+{% block content %}
+
+  <div class="card">
+    <div class="card-body">
+      <!-- 小標題 -->
+      <div class="row">
+        <h4 class="col-6" style="text-align: center;">原始照片</h4>
+        <h4 class="col-6" style="text-align: center;">檢測結果圖</h4>
+      </div>
+
+      <!-- 圖片 -->
+      <div class="row">
+        <img class="col-6" src="{{record.original_img|safe}}" style="width: 50%;">
+        {% if record.result_img != '無檢測結果'  %}
+        <img class="col-6" src="/{{record.result_img|safe}}" style="width: 50%;">
+        {% endif %}
+        {% if record.result_img == '無檢測結果'  %}
+            <div class="col-6" style="align-self: center;"><h2 style="text-align: center;">無檢測結果</h2></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <div class="card-body">
+
+      <div style="overflow:auto;">
+        <table class="table table-hover display table-striped table-bordered" id="Table" style="white-space: nowrap;">
+          <thead>
+            <tr>
+              <th class="table_title">項次</th>
+              <th class="table_title">瑕疵類別</th>
+              <th class="table_title">概率分數</th>
+              <th class="table_title">瑕疵面積</th>
+              <th class="table_title">方框面積</th>
+              <th class="table_title">瑕疵佔方框的面積</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for defect in defects_json %}
+            <tr>
+              <td class="text-center">第{{defect.num|safe}}個瑕疵</td>
+              <td class="text-center">{{defect.class_ids|safe}}</td>
+              <td class="text-center">{{defect.scores_1f|safe}}</td>
+              <td class="text-center">{{defect.defect_range|safe}}</td>
+              <td class="text-center">{{defect.bbox_range|safe}}</td>
+              <td class="text-center">{{defect.defect_area_percent|safe}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+    
+{% endblock content %}
+

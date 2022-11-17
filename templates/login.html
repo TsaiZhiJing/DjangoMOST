@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>基於複合式高速存取資料庫之車輛瑕疵檢測系統</title>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{% static '/plugins/fontawesome-free/css/all.min.css' %}">
+  <link rel="stylesheet" href="{% static '/plugins/toastr/toastr.min.css' %}">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static '/plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static '/dist/css/adminlte.min.css' %}">
+  <!--Login Page Csss-->
+  <link rel="stylesheet" href="{% static '/dist/css/login-page.css' %}">
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700">
+  <!-- Web Icon -->
+  <link rel="shortcut icon" href="{% static 'img/logo2.png' %}">
+</head>
+
+
+<body>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <div class="login100-pic js-tilt" style="font-size: 26pt; width: 120%; text-align: center; padding-bottom: 50px;">
+                    基於複合式高速存取資料庫之車輛瑕疵檢測系統
+                </div>
+                <div class="login100-pic js-tilt" style="width: 300px; align-self: center;">
+                    <img src="{% static '/img/logo2-plus.png' %}">
+                </div>
+    
+                <form class="login100-form" style="background-color:bisque; border-radius: 30px; padding-top: 20px; padding-bottom: 20px;" method="post" action="/login/">
+                    <input type="hidden" name="submitType" value="passLogin">
+                    <div style="padding-bottom: 10px; font-size: 20pt; text-align: center;">點擊所在「維修廠」</div>
+                    <div class="btn-toolbar text-center well" style="margin-left: 50pt;">
+                        {% for site in site_json %}
+                            <form action="/login/" method="post" class="form-horizontal form-material">
+                                {% csrf_token %}
+                                <input type="hidden" name="submitType" value="siteLogin">
+                                <input type="hidden" name="name" value="{{site.name|safe}}">
+                                <button type="submit" class="btn btn-warning" style="font-size: 20pt; width: 100pt; margin: 6pt;">{{site.name|safe}}</button>
+                            </form>
+                        {%  endfor %}
+                    </div>
+    
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</body>

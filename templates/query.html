@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}查詢歷史資料{% endblock title %}
+
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+
+    
+                <form action="/query/" method="post" class="form-horizontal form-material">
+                    {% csrf_token %}
+
+
+      <!-- 站點名稱 -->
+      <div class="form-group row">
+        <label class="col-2 col-form-label col_title">
+          查詢站點：
+        </label>
+        <label class="col-form-label" style="font-size: 14pt;">
+          <!-- 已選 -->
+          {% if profile.cbox %}
+            {% for site in site_json %}
+              {% if site.uid in profile.cbox %}
+                <label style="padding-right: 5pt;">
+                  <input type="checkbox" name="cbox" value="{{site.uid}}" checked>
+                  {{site.name}}
+                </label>
+              {%  endif %}
+              {% if site.uid not in profile.cbox %}
+                <label style="padding-right: 5pt;">
+                  <input type="checkbox" name="cbox" value="{{site.uid}}">
+                  {{site.name}}
+                </label>
+              {%  endif %}
+            {%  endfor %}
+          {%  endif %}
+          <!-- 未選 -->
+          {% if not profile.cbox %}
+            {% for site in site_json %}
+              <label style="padding-right: 5pt;">
+                <input type="checkbox" name="cbox" value="{{site.uid}}">
+                {{site.name}}
+              </label>
+            {%  endfor %}
+          {%  endif %}
+        </label>
+      </div>
+
+
+      <!-- 上傳日期 -->
+      <div class="form-group row">
+        <label class="col-2 col-form-label col_title">
+          上傳日期(起)：
+        </label>
+        <div class="col-2">
+          <input type="date" class="form-control" max="2200-12-30" name="arrival_date_s" id="ds" value="{{profile.arrival_date_s}}" >
+        </div>
+
+        <!-- 迄 -->
+        <label class="col-form-label col_title">
+          (迄)：
+        </label>
+        <div class="col-2">
+          <input type="date" class="form-control" max="2200-12-30" name="arrival_date_e" id="de" value="{{profile.arrival_date_e}}" >
+        </div>
+      </div>
+
+      <!-- 送出 -->
+      <div class="form-group row" style="text-align: center;">
+        <div class="col-6">
+          <button type="submit" id="btnzj" class="btn btn-success">查詢</button>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</div>
+  
+
+
+
+{% if query_json %}
+<h3 style="text-align: center; font-weight:bold;">查詢結果</h3>
+<div class="card">
+  <div class="card-body">
+
+    <div style="overflow:auto;">
+      
+      <table class="table table-hover display table-striped table-bordered" id="myTable" style="white-space: nowrap;">
+        <thead>
+          <tr>
+            <th class="table_title"></th>
+            <th class="table_title">站點名稱</th>
+            <th class="table_title">上傳日期</th>
+            <th class="table_title">原始圖</th>
+            <th class="table_title">AI檢測結果圖</th>
+            <th class="table_title">影像檢測耗時</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for query in query_json %}
+          {% if query.state == 1  %}
+          <tr class="clicktabke-row" data-href="{% url 'detail' query.rid %}">
+            <td class="text-center">{{query.rid}}</td>
+            <td class="text-center">{{query.site_name}}</td>
+            <td class="text-center">{{query.arrival_time}} 111</td>
+            <td class="text-center"><img src="{{query.original_img|safe}}" style="height: 100pt;"></td>
+            {% if query.result_img != '無檢測結果'  %}
+            <td class="text-center"><img src="/{{query.result_img|safe}}" style="height: 100pt;"></td>
+            {% endif %}
+            {% if query.result_img == '無檢測結果'  %}
+            <td class="text-center">無檢測結果</td>
+            {% endif %}
+            {% if query.spend_time != '無檢測結果'  %}
+            <td class="text-center">{{query.spend_time}}</td>
+            {% endif %}
+            {% if query.spend_time == '無檢測結果'  %}
+            <td class="text-center">無檢測結果</td>
+            {% endif %}
+          </tr>
+          {% endif %}
+          {% if query.state == 0  %}
+          <tr>
+            <td class="text-center">{{query.rid}}</td>
+            <td class="text-center">{{query.site_name}}</td>
+            <td class="text-center">{{query.arrival_time}} 000</td>
+            <td class="text-center"><img src="{{query.original_img|safe}}" style="height: 100pt;"></td>
+            {% if query.result_img != '無檢測結果'  %}
+            <td class="text-center"><img src="/{{query.result_img|safe}}" style="height: 100pt;"></td>
+            {% endif %}
+            {% if query.result_img == '無檢測結果'  %}
+            <td class="text-center">無檢測結果</td>
+            {% endif %}
+            {% if query.spend_time != '無檢測結果'  %}
+            <td class="text-center">{{query.spend_time}}</td>
+            {% endif %}
+            {% if query.spend_time == '無檢測結果'  %}
+            <td class="text-center">無檢測結果</td>
+            {% endif %}
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+{% endblock content %}
+
+
+
+{% block morejs %}
+
+
+<script>
+  $('#myTable').DataTable({
+      language: {
+          "emptyTable": "無資料...",
+          "processing": "處理中...",
+          "loadingRecords": "載入中...",
+          "lengthMenu": "每頁顯示 _MENU_ 筆資料",
+          "zeroRecords": "無搜尋結果",
+          // "info": "_START_ 至 _END_ / 共 _TOTAL_ 筆",
+          "info": "共 _TOTAL_ 筆｜第 _START_ ~ _END_ 筆",
+          "infoEmpty": "查無資料",
+          "infoFiltered": "(從 _MAX_ 筆資料過濾)",
+          "infoPostFix": "",
+          "search": "關鍵字搜尋:",
+          "paginate": {
+              "first": "首頁",
+              "last": "末頁",
+              "next": "下一頁",
+              "previous": "上一頁"
+          },
+          "aria": {
+              "sortAscending": ": 升冪",
+              "sortDescending": ": 降冪"
+          }
+      },
+      dom: "<'row'<'col-sm-4'l>" + "<'col-sm-8'f>>" +
+           "<'row'<'col-sm-4'i>" + "<'col-sm-8'p>>" +
+           "<'row'<'col-sm-12'tr>>" + 
+           "<'row'<'col-sm-12'p>>"
+           
+      // order: [[ 8, "desc" ]]
+  });
+</script>
+{% endblock morejs %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}車輛瑕疵檢測{% endblock title %}
+
+
+{% block content %}
+
+  <div class="card">
+    <div class="card-body">
+
+      <form action="/" method="post" class="form-horizontal form-material" enctype="multipart/form-data" >
+        {% csrf_token %}
+
+        {% if msg %}
+        <center><div class="alert alert-warning h3">{{ msg }}</div></center>
+        {% endif %}  
+        
+        
+        <div class="form-group row">
+          <!-- 上傳圖片 -->
+          <label class="col-3 col-form-label col_title">
+              <label style="color: red;">*</label>
+              上傳瑕疵車輛圖片：
+          </label>
+          <div class="col-6">
+            <input id="pbInput" type="file" name="fileField" accept="image/gif, image/jpeg, image/png" class="form-control" style="font-size: 16pt;" required>
+          </div>
+
+          <!-- 按鈕 -->
+          <div class="col-3">
+            <button type="submit" onclick="Upload()" class="btn btn-primary" style="font-size: 16pt;">檢測車輛瑕疵</button>
+          </div>
+
+        </div>
+
+        <!-- Loading -->
+        <!-- <center>
+          <div id="loading" class="loader">
+            <div class="loader__figure"></div>
+            <p class="loader__label">照片上傳中</p>
+          </div>
+        </center> -->
+
+        <br>
+
+        <center><img id="pb_preview_img" style="height: 60%; width: 60%;"/></center>
+
+      </form>
+      
+    </div>
+  </div>
+        
+
+  <center><h3 style="color: black;">預覽最新上傳的五個檢測結果</h3></center>
+
+
+  {% for record in detection_records %}
+    <div class="card">
+      <div class="card-body">
+        <!-- 小標題 -->
+        <div class="row">
+          <h4 class="col-6" style="text-align: center;">原始照片</h4>
+          <h4 class="col-6" style="text-align: center;">檢測結果圖</h4>
+        </div>
+
+        <!-- 圖片 -->
+        <div class="row">
+          <img class="col-6" src="{{record.original_img|safe}}" style="width: 50%;">
+          {% if record.result_img != '無檢測結果'  %}
+          <img class="col-6" src="/{{record.result_img|safe}}" style="width: 50%;">
+          {% endif %}
+          {% if record.result_img == '無檢測結果'  %}
+              <div class="col-6" style="align-self: center;"><h2 style="text-align: center;">無檢測結果</h2></div>
+          {% endif %}
+        </div></br>
+
+        <!-- 明細 -->
+        <div>
+          <h4 class="h4" style="color: black;">圖片來自：{{record.site_name|safe}}</h4>
+          <h4 class="h4" style="color: black;">上傳時間：{{record.arrival_time|safe}}</h4>
+          <h4 class="h4" style="color: black;">檢測耗時：{{record.spend_time|safe}}</h4>
+
+          <!-- 無瑕疵 -->
+          {% if record.state == 0  %}
+            <h4 class="h4" style="color: red;">{{record.defect_array}}</h4>
+          {% endif %}
+
+          <!-- 有瑕疵 -->
+          {% if record.state == 1  %}
+            <h4 class="h4" style="color: red;">檢測結果(共計{{record.num}}個瑕疵)，細節如下表：</h4>
+            <div style="overflow:auto;">
+              <table class="table table-hover display table-striped table-bordered" id="Table" style="white-space: nowrap;">
+                <thead>
+                  <tr>
+                    <th class="table_title">項次</th>
+                    <th class="table_title">瑕疵類別</th>
+                    <th class="table_title">概率分數</th>
+                    <th class="table_title">瑕疵面積</th>
+                    <th class="table_title">方框面積</th>
+                    <th class="table_title">瑕疵佔方框的面積</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  {% for defect in record.defect_array %}
+                  <tr>
+                    <td class="text-center">第{{defect.num|safe}}個瑕疵</td>
+                    <td class="text-center">{{defect.class_ids|safe}}</td>
+                    <td class="text-center">{{defect.scores_1f|safe}}</td>
+                    <td class="text-center">{{defect.defect_range|safe}}</td>
+                    <td class="text-center">{{defect.bbox_range|safe}}</td>
+                    <td class="text-center">{{defect.defect_area_percent|safe}}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  {% endfor %}
+        
+      
+
+
+
+      
+    </div>
+  </div>
+    
+
+
+{% endblock content %}
+
+
+
+{% block morejs %}
+<script>
+  function readURL(input){
+    if(input.files && input.files[0]){
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      if(input.files[0]){
+        
+      }
+      $("#pb_preview_img").attr('src', e.target.result);
+    }
+    reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  $("#pbInput").change(function(){
+    readURL(this);
+  });
+</script>
+
+
+{% endblock morejs %}
